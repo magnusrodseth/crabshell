@@ -1,7 +1,5 @@
 use std::{env, io::{stdout, Write}};
-use std::iter::Skip;
 use std::process::Command as ProcessCommand;
-use std::str::SplitWhitespace;
 use text_io::read;
 
 fn print_working_directory() {
@@ -23,25 +21,10 @@ struct Command<'a> {
     arguments: Vec<&'a str>,
 }
 
-impl Command<'_> {
-    fn format(&self) -> String {
-        format!("{} {:?}", self.command_name, self.arguments)
-    }
-}
-
-fn is_valid_user_input(user_input: &str) -> bool {
-    // TODO: Implement real validation
-    user_input.len() >= 1
-}
-
 fn main() {
     print_working_directory();
 
     let user_input: String = read!("{}\n");
-
-    if !is_valid_user_input(&user_input) {
-        // TODO: Handle illegal user input 
-    }
 
     let split = user_input.split_whitespace();
     let command_name = split.clone().next().unwrap();
@@ -52,14 +35,12 @@ fn main() {
         arguments,
     };
 
-    let out = {
+    let result = {
         ProcessCommand::new(command.command_name)
             .args(command.arguments)
             .output()
             .expect("Failed to execute the command!")
     };
 
-    let stdout = out.stdout;
-
-    println!("{}", std::str::from_utf8(&stdout).unwrap());
+    println!("{}", std::str::from_utf8(&result.stdout).unwrap());
 }
