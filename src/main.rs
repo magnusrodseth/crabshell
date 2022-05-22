@@ -1,11 +1,9 @@
-mod command;
+mod commands;
 
-use std::{env::{self, set_current_dir}, io::{stdout, Write}};
+use std::{env, io::{stdout, Write}};
+use commands::{Command, is_cd_command, change_directory};
 use std::process::Command as ProcessCommand;
-use std::path::Path;
-use home::home_dir;
 use text_io::read;
-use command::Command;
 
 fn print_working_directory() {
     let path = env::current_dir();
@@ -21,22 +19,6 @@ fn print_working_directory() {
     stdout().flush().unwrap();
 }
 
-fn is_cd_command(command: &str) -> bool {
-    command.eq("cd")
-}
-
-fn change_directory(path: &str) -> std::io::Result<()> {
-    let home_directory = home_dir().unwrap();
-    let home_as_path = home_directory.as_path();
-
-    let directory = match path {
-        "~" => home_as_path,
-        "" => Path::new("/"),
-        _ => Path::new(path)
-    };
-
-    set_current_dir(directory)
-}
 
 fn main() {
     loop {
