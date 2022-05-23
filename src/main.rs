@@ -1,16 +1,17 @@
 mod commands;
 
-use std::{env, io::{stdout, Write}};
-use commands::{Command, is_cd_command, change_directory};
+use commands::{change_directory, is_cd_command, Command};
 use std::process::Command as ProcessCommand;
+use std::{
+    env,
+    io::{stdout, Write},
+};
 use text_io::read;
 
 fn print_working_directory() {
-    let path = env::current_dir();
-
-    match path {
-        Ok(_) => print!("{}: ", path.unwrap().display()),
-        Err(_) => panic!("An error occurred when printing the working directory!")
+    match env::current_dir() {
+        Ok(path) => print!("{}: ", path.display()),
+        Err(_) => panic!("An error occurred when printing the working directory!"),
     }
 
     // flush() forces the buffer to be flushed, causing the content
@@ -18,7 +19,6 @@ fn print_working_directory() {
     // even if it normally would wait to do so.
     stdout().flush().unwrap();
 }
-
 
 fn main() {
     loop {
@@ -29,7 +29,8 @@ fn main() {
         let command = Command::new(&input);
 
         if is_cd_command(command.command_name) {
-            let path = command.arguments
+            let path = command
+                .arguments
                 .clone()
                 .into_iter()
                 .next()
@@ -40,11 +41,16 @@ fn main() {
             continue;
         }
 
-        let result = ProcessCommand::new(command.command_name)
+        let command_result = ProcessCommand::new(command.command_name)
             .args(command.arguments)
-            .output()
-            .expect("Failed to execute the command!");
+            .output();
 
-        println!("{}", std::str::from_utf8(&result.stdout).unwrap());
+        match command_result {
+            Ok(output) => match std::str::from_utf8(&output.stdout) {
+                Ok(stdout) => println!("{}", stdout),
+                Err(error) => println!("{}", error),
+            },
+            Err(error) => println!("{}", error)
+        }
     }
 }
