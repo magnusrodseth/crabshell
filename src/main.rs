@@ -1,5 +1,7 @@
 mod commands;
 mod redirection;
+mod utils;
+mod background_process;
 
 use commands::{change_directory, is_cd_command, Command};
 use redirection::{redirect};
@@ -9,22 +11,10 @@ use std::{
     io::{stdout, Write},
 };
 use text_io::{read};
+use crate::background_process::is_background_process;
+use crate::redirection::contains_redirection;
+use crate::utils::print_working_directory;
 
-fn print_working_directory() {
-    match env::current_dir() {
-        Ok(path) => print!("{}: ", path.display()),
-        Err(_) => panic!("An error occurred when printing the working directory!"),
-    }
-
-    // flush() forces the buffer to be flushed, causing the content
-    // of the buffer to be written to the terminal,
-    // even if it normally would wait to do so.
-    stdout().flush().unwrap();
-}
-
-fn contains_redirection(input: &str) -> bool {
-    input.contains('<') || input.contains('>') || input.contains('|')
-}
 
 fn main() {
     loop {

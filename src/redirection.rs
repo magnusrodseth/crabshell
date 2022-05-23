@@ -27,6 +27,10 @@ pub fn redirect(input: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+pub fn contains_redirection(input: &str) -> bool {
+    input.contains('<') || input.contains('>') || input.contains('|')
+}
+
 fn redirect_in_and_out(input: &str) -> Result<(), Box<dyn Error>> {
     // Case: command < file in > file out
     let mut in_split = input.split("<");

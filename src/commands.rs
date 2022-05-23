@@ -23,7 +23,7 @@ impl Command<'_> {
 }
 
 pub fn is_cd_command(command: &str) -> bool {
-    command.len() == 2 && command[..2].eq("cd")
+    command.len() == 2 && command[..2] == "cd"
 }
 
 pub fn change_directory(path: &str) -> std::io::Result<()> {
