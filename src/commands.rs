@@ -1,5 +1,7 @@
 use home::home_dir;
 use std::env::set_current_dir;
+use std::io::Error;
+use std::io::ErrorKind::NotFound;
 use std::path::Path;
 
 pub struct Command<'a> {
@@ -21,11 +23,11 @@ impl Command<'_> {
 }
 
 pub fn is_cd_command(command: &str) -> bool {
-    command.eq("cd")
+    command.len() == 2 && command[..2].eq("cd")
 }
 
 pub fn change_directory(path: &str) -> std::io::Result<()> {
-    let home_directory = home_dir().unwrap_or_default();
+    let home_directory = home_dir().ok_or(Error::from(NotFound))?;
     let home_as_path = home_directory.as_path();
 
     let directory = match path {
