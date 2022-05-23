@@ -8,15 +8,16 @@ pub fn redirect(input: &str) -> Result<(), Box<dyn Error>> {
     let redirect_out_index = input.find(">");
 
     if should_redirect_in_and_out(input) {
-        // Case: command < file in > file out
+        match redirect_in_and_out(input) {
+            Ok(_) => (),
+            Err(error) => println!("{}", error)
+        }
     } else if should_redirect_out(input, redirect_out_index) {
-        // Case: command > file out
         match redirect_out(input) {
             Ok(_) => (),
             Err(error) => println!("{}", error)
         }
     } else if should_redirect_in(input, redirect_in_index) {
-        // Case: command < file in
         match redirect_in(input) {
             Ok(_) => (),
             Err(error) => println!("{}", error)
@@ -26,7 +27,43 @@ pub fn redirect(input: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn redirect_in_and_out(input: &str) -> Result<(), Box<dyn Error>> {
+    // Case: command < file in > file out
+    let mut in_split = input.split("<");
+    let command_input = in_split.next();
+    let rest = in_split.next();
+    let mut out_split = rest.clone().unwrap().split(">");
+    let filename_in = out_split.next();
+    let filename_out = out_split.next();
+
+    // TODO: Validation
+    if command_input.is_some()
+        && filename_in.is_some()
+        && filename_out.is_some()
+    {
+        let command_input = command_input.unwrap().trim();
+        let filename_in = filename_in.unwrap().trim();
+        let filename_out = filename_out.unwrap().trim();
+
+        let command = Command::new(command_input);
+        let file_in = File::open(filename_in)?;
+
+        let output = ProcessCommand::new(command.command_name)
+            .args(command.arguments)
+            // The child process' stdin comes from the opened file
+            .stdin(file_in)
+            .output()?;
+
+        let stdout = std::str::from_utf8(&output.stdout)?;
+
+        write_to_file(stdout, filename_out)?;
+    }
+
+    Ok(())
+}
+
 fn redirect_in(input: &str) -> Result<(), Box<dyn Error>> {
+    // Case: command < file in
     let mut split = input.split("<");
     let command_input = split.next();
     let filename = split.next();
@@ -43,8 +80,7 @@ fn redirect_in(input: &str) -> Result<(), Box<dyn Error>> {
             .args(command.arguments)
             // The child process' stdin comes from the opened file
             .stdin(file)
-            .output()
-            .expect("file error!!");
+            .output()?;
 
         let stdout = std::str::from_utf8(&output.stdout)?;
         println!("{}", stdout);
@@ -54,6 +90,7 @@ fn redirect_in(input: &str) -> Result<(), Box<dyn Error>> {
 }
 
 fn redirect_out(input: &str) -> Result<(), Box<dyn Error>> {
+    // Case: command > file out
     let mut split = input.split(">");
     let command_input = split.next();
     let filename = split.next();
