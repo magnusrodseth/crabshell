@@ -1,16 +1,13 @@
 mod commands;
 mod redirection;
 mod utils;
-mod pipelines;
 
+use crate::redirection::contains_redirection;
+use crate::utils::print_working_directory;
 use commands::{change_directory, is_cd_command, Command};
 use redirection::redirect;
 use std::process::Command as ProcessCommand;
 use text_io::read;
-use crate::pipelines::{contains_pipeline, pipeline};
-use crate::redirection::contains_redirection;
-use crate::utils::print_working_directory;
-
 
 fn main() {
     loop {
@@ -30,17 +27,7 @@ fn main() {
 
             match change_directory(path) {
                 Ok(_) => (),
-                Err(error) => println!("{}", error)
-            }
-
-            continue;
-        }
-
-        // Pipeline
-        if contains_pipeline(input) {
-            match pipeline(input) {
-                Ok(_) => (),
-                Err(error) => println!("{}", error)
+                Err(error) => println!("{}", error),
             }
 
             continue;
@@ -50,7 +37,7 @@ fn main() {
         if contains_redirection(input) {
             match redirect(input) {
                 Ok(_) => (),
-                Err(error) => println!("{}", error)
+                Err(error) => println!("{}", error),
             }
 
             continue;

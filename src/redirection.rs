@@ -1,7 +1,7 @@
+use crate::{Command, ProcessCommand};
 use std::error::Error;
 use std::fs::File;
-use std::io::{Write};
-use crate::{Command, ProcessCommand};
+use std::io::Write;
 
 pub fn redirect(input: &str) -> Result<(), Box<dyn Error>> {
     let redirect_in_index = input.find("<");
@@ -10,24 +10,22 @@ pub fn redirect(input: &str) -> Result<(), Box<dyn Error>> {
     if should_redirect_in_and_out(input) {
         match redirect_in_and_out(input) {
             Ok(_) => (),
-            Err(error) => println!("{}", error)
+            Err(error) => println!("{}", error),
         }
     } else if should_redirect_out(input, redirect_out_index) {
         match redirect_out(input) {
             Ok(_) => (),
-            Err(error) => println!("{}", error)
+            Err(error) => println!("{}", error),
         }
     } else if should_redirect_in(input, redirect_in_index) {
         match redirect_in(input) {
             Ok(_) => (),
-            Err(error) => println!("{}", error)
+            Err(error) => println!("{}", error),
         }
     }
 
     Ok(())
 }
-
-
 
 pub fn contains_redirection(input: &str) -> bool {
     input.contains('<') || input.contains('>')
@@ -43,10 +41,7 @@ fn redirect_in_and_out(input: &str) -> Result<(), Box<dyn Error>> {
     let filename_out = out_split.next();
 
     // TODO: Validation
-    if command_input.is_some()
-        && filename_in.is_some()
-        && filename_out.is_some()
-    {
+    if command_input.is_some() && filename_in.is_some() && filename_out.is_some() {
         let command_input = command_input.unwrap().trim();
         let filename_in = filename_in.unwrap().trim();
         let filename_out = filename_out.unwrap().trim();
@@ -153,3 +148,4 @@ fn write_to_file(payload: &str, filename: &str) -> Result<(), std::io::Error> {
     file.write_all(payload.as_ref())?;
     Ok(())
 }
+
