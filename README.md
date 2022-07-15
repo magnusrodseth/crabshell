@@ -33,7 +33,3 @@ cargo run
 # Test the application
 cargo test
 ```
-
-## Functionality 
-
-> TODO: Fill in supported functionality
